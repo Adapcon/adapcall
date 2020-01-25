@@ -15,18 +15,40 @@
 				</td>
 			</tr>
 		</table>
-		<input
-			type="button"
-			@click="criarLigacao"
-			value="Criar Ligação"
-		>
+		<form @submit.prevent="criarLigacao">
+			<fieldset>
+				<legend>Criar Ligação</legend>
+				{{ ligacao }}
+				<div>
+					Solicitante:
+					<input type="text"
+						v-model="ligacao.solicitante"
+					>
+				</div>
+				<div>
+					Solicitado:
+					<input type="text"
+						v-model="ligacao.solicitado"
+					>
+				</div>
+				<button type="submit"> Criar Ligação </button>
+			</fieldset>
+		</form>
   </div>
 </template>
 
 <script>
+
+const novaLigacao = {
+	id: '',
+	solicitante: '',
+	solicitado: '',
+}
+
 export default {
 	data() {
 		return {
+			ligacao: { ...novaLigacao },
 			ligacoes: [
 				{
 					id: 2424,
@@ -45,13 +67,11 @@ export default {
 	},
 	methods: {
 		criarLigacao() {
-			this.ligacoes.push({
-				id: 2426,
-				solicitante: "Sérgio",
-				solicitado: "Luís TI Colcci",
-				urgente: false,
+			this.ligacoes.push({ 
+				...this.ligacao,
+				id: this.ligacoes.length,
 			})
-		}
+		},
 	}
 };
 </script>
