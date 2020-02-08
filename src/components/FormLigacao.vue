@@ -1,9 +1,11 @@
 <template>
   <form @submit.prevent="salvar">
+    <div style="text-align: right;">
+      <button @click.prevent="fechar" class="btn btn-primary">Fechar</button>
+    </div>
     <div v-if="editando">Voce está editando a ligação: {{ formLigacao.id }}</div>
-    <fieldset>
-      <legend>Criar Ligação</legend>
-      {{ formLigacao }}
+    <fieldset :class="{ 'error': errorMessage }">
+      <legend :class="{ 'error': errorMessage }">Criar Ligação</legend>
       <div>
         Solicitante:
         <input type="text" v-model="formLigacao.solicitante" required />
@@ -16,8 +18,8 @@
         Urgente:
         <input type="checkbox" v-model="formLigacao.urgente" />
       </div>
-      <button type="submit">{{ editando ? 'Salvar alterações' : 'Criar Ligação' }}</button>
-      <button type="button" @click="apagarLista">Apagar Lista</button>
+      <button type="submit" class="btn btn-primary">{{ editando ? 'Salvar alterações' : 'Criar Ligação' }}</button>
+      <button @click="apagarLista" class="btn btn-primary">Apagar Lista</button>
     </fieldset>
   </form>
 </template>
@@ -32,7 +34,7 @@ const novaLigacao = {
 };
 
 export default {
-  props: ['ligacoes', 'ligacao'],
+  props: ['ligacoes', 'ligacao', 'errorMessage'],
   data() {
     return {
       formLigacao: { ...novaLigacao },
@@ -63,16 +65,13 @@ export default {
         // Editar
         this.$emit('atualizar-lista', ligacaoAInserir);
       }
-
-      // Limpando formulário
-      this.formLigacao = { ...novaLigacao };
     },
     apagarLista() {
       this.$emit('setar-lista', []);
     },
+    fechar() {
+      this.$emit('fechar');
+    },
   },
 };
 </script>
-
-<style>
-</style>

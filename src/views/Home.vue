@@ -1,24 +1,36 @@
 <template>
   <div class="home">
-    <!-- Lista -->
-    <Ligacoes
-      :ligacoes="ligacoes"
-      :is-loading="isLoading"
-      @excluir="excluir"
-      @editar="editar" />
+    <div v-if="errorMessage" class="error alert alert-danger">
+      {{ errorMessage }}
+    </div>
+    <div v-show="isLoading.list">Carregando...</div>
 
-    <!-- Mostra form -->
-    <button @click="() => mostraFormulario = !mostraFormulario">Mostrar formulario</button>
+    <div v-show="!isLoading.list">
+      <!-- Mostra form -->
+      <button class="btn btn-primary" @click="() => mostraFormulario = !mostraFormulario">Mostrar formulario</button>
 
-    <!-- Formulário -->
-    <FormLigacao
-      v-if="mostraFormulario"
-      :ligacao="ligacao"
-      :ligacoes="ligacoes"
-      @setar-lista="setarListar"
-      @inserir-lista="inserirLista"
-      @atualizar-lista="atualizarLista"
-    />
+      <div v-show="isLoading.form">Carregando...</div>
+      <div v-show="!isLoading.form">
+        <!-- Formulário -->
+        <FormLigacao
+          v-if="mostraFormulario"
+          :ligacao="ligacao"
+          :ligacoes="ligacoes"
+          :error-message="errorMessage"
+          @setar-lista="setarListar"
+          @inserir-lista="inserirLista"
+          @atualizar-lista="atualizarLista"
+          @fechar="resetForm"
+        />
+      </div>
+
+      <!-- Lista -->
+      <Ligacoes
+        :ligacoes="ligacoes"
+        :is-loading="isLoading"
+        @excluir="excluir"
+        @editar="editar" />
+    </div>
   </div>
 </template>
 
@@ -38,54 +50,93 @@ export default {
       ligacao: '',
       mostraFormulario: false,
       ligacoes: [],
+      errorMessage: '',
 
-      isLoading: false,
+      isLoading: {},
     };
   },
-  async mounted() {
-    this.isLoading = true;
-
-    try {
-      const res = await axios.get('https://5e3589a4f7e55d0014ad4dc7.mockapi.io/ligacoes');
-      console.log('res', res);
-
-      if (Array.isArray(res.data)) this.ligacoes = res.data;
-
-      // sucesso!!! deu tudo certo
-    } catch (err) {
-      // Deu ruim!!
-      console.error('err', err);
-    } finally {
-      this.isLoading = false;
-    }
+  mounted() {
+    this.getList();
   },
   methods: {
     setarListar(valor) {
       this.ligacoes = valor;
     },
-    inserirLista(ligacao) {
-      // Coloca no final da lista
-      this.ligacoes.push(ligacao);
+    async getList() {
+      const res = await this.request({ id: 'list' });
 
-      // Reseta o formulário
-      this.resetForm();
+      if (res && Array.isArray(res.data)) this.ligacoes = res.data;
     },
-    atualizarLista(ligacao) {
-      const indice = this.ligacoes.findIndex(l => ligacao.id === l.id);
+    async request({ id, ...requestParams } = {}) {
+      if (this.isLoading[id]) return;
 
-      // substitui na posição indicada
-      this.ligacoes.splice(indice, 1, ligacao);
+      this.$set(this.isLoading, id, true);
+      this.errorMessage = '';
 
-      // Reseta o formulário
-      this.resetForm();
+      try {
+        const res = await axios({
+          method: 'GET',
+          url: 'https://5e3589a4f7e55d0014ad4dc7.mockapi.io/ligacoes',
+          ...requestParams,
+        });
+
+        // Reseta o formulário
+        this.resetForm();
+
+        // eslint-disable-next-line consistent-return
+        return res;
+      } catch (err) {
+        this.errorMessage = err.response.data;
+        // Deu ruim!!
+        console.error('err', err);
+      } finally {
+        this.$set(this.isLoading, id, false);
+      }
+    },
+    async inserirLista(ligacao) {
+      const res = await this.request({
+        id: 'form',
+        method: 'POST',
+        data: ligacao,
+      });
+
+      if (res && res.status === 201) {
+        // Coloca no final da lista
+        this.ligacoes.push(res.data);
+      }
+    },
+    async atualizarLista(ligacao) {
+      const res = await this.request({
+        id: 'form',
+        method: 'PUT',
+        url: `https://5e3589a4f7e55d0014ad4dc7.mockapi.io/ligacoes/${ligacao.id}`,
+        data: ligacao,
+      });
+
+      if (res && res.status === 200) {
+        const indice = this.ligacoes.findIndex(l => ligacao.id === l.id);
+
+        // substitui na posição indicada
+        this.ligacoes.splice(indice, 1, ligacao);
+      }
     },
     resetForm() {
       this.mostraFormulario = false;
       this.ligacao = '';
     },
-    excluir(indice) {
-      // Remove da posição
-      this.ligacoes.splice(indice, 1);
+    async excluir(indice) {
+      const { id } = this.ligacoes[indice];
+
+      const res = await this.request({
+        id,
+        method: 'DELETE',
+        url: `https://5e3589a4f7e55d0014ad4dc7.mockapi.io/ligacoes/${id}`,
+      });
+
+      if (res && res.status === 200) {
+        // Remove da posição
+        this.ligacoes.splice(indice, 1);
+      }
     },
     editar(indice) {
       this.ligacao = this.ligacoes[indice];
