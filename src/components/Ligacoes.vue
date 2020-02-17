@@ -23,11 +23,11 @@
           <span v-else>(de boas)</span>
         </td>
         <td>
-          <div v-if="isLoading[ligacao.id]">Carregando...</div>
+          <ac-loading v-show="isLoading[ligacao.id]" />
 
           <template v-if="!isLoading[ligacao.id]">
-            <button @click="editar(indice)" class="btn btn-primary">Editar</button>
-            <button @click="excluir(indice)" class="btn btn-primary">Excluir</button>
+            <ac-button @click.native="editar(indice)" type="primary" icon="fa-edit"></ac-button>
+            <ac-button @click.native="excluir(indice)" type="secondary" icon="fa-trash"></ac-button>
           </template>
         </td>
       </tr>

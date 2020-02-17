@@ -3,25 +3,32 @@
     <div v-if="errorMessage" class="error alert alert-danger">
       {{ errorMessage }}
     </div>
+
     <div v-show="isLoading.list">Carregando...</div>
 
     <div v-show="!isLoading.list">
       <!-- Mostra form -->
-      <button class="btn btn-primary" @click="() => mostraFormulario = !mostraFormulario">Mostrar formulario</button>
+      <div class="mt-3 mb-2">
+        <transition name="fade" mode="out-in">
+          <ac-button v-show="!mostraFormulario" type="primary" @click.native="() => mostraFormulario = !mostraFormulario" icon="fa-plus">Nova Ligação</ac-button>
+        </transition>
+      </div>
 
       <div v-show="isLoading.form">Carregando...</div>
       <div v-show="!isLoading.form">
-        <!-- Formulário -->
-        <FormLigacao
-          v-if="mostraFormulario"
-          :ligacao="ligacao"
-          :ligacoes="ligacoes"
-          :error-message="errorMessage"
-          @setar-lista="setarListar"
-          @inserir-lista="inserirLista"
-          @atualizar-lista="atualizarLista"
-          @fechar="resetForm"
-        />
+        <transition name="fade" mode="out-in">
+          <!-- Formulário -->
+          <FormLigacao
+            v-if="mostraFormulario"
+            :ligacao="ligacao"
+            :ligacoes="ligacoes"
+            :error-message="errorMessage"
+            @setar-lista="setarListar"
+            @inserir-lista="inserirLista"
+            @atualizar-lista="atualizarLista"
+            @fechar="resetForm"
+          />
+        </transition>
       </div>
 
       <!-- Lista -->
@@ -150,3 +157,12 @@ export default {
   },
 };
 </script>
+
+<style>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+</style>

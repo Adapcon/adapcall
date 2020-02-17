@@ -1,27 +1,41 @@
 <template>
-  <form @submit.prevent="salvar">
-    <div style="text-align: right;">
-      <button @click.prevent="fechar" class="btn btn-primary">Fechar</button>
-    </div>
-    <div v-if="editando">Voce está editando a ligação: {{ formLigacao.id }}</div>
-    <fieldset :class="{ 'error': errorMessage }">
-      <legend :class="{ 'error': errorMessage }">Criar Ligação</legend>
-      <div>
-        Solicitante:
-        <input type="text" v-model="formLigacao.solicitante" required />
+  <div class="col-auto">
+    <form @submit.prevent="salvar">
+      <div style="text-align: right;">
+        <ac-button @click.native.prevent="fechar" type="primary" icon="fa-times">Fechar</ac-button>
       </div>
-      <div>
-        Solicitado:
-        <input type="text" v-model="formLigacao.solicitado" required />
-      </div>
-      <div>
-        Urgente:
-        <input type="checkbox" v-model="formLigacao.urgente" />
-      </div>
-      <button type="submit" class="btn btn-primary">{{ editando ? 'Salvar alterações' : 'Criar Ligação' }}</button>
-      <button @click="apagarLista" class="btn btn-primary">Apagar Lista</button>
-    </fieldset>
-  </form>
+      <div v-if="editando">Voce está editando a ligação: {{ formLigacao.id }}</div>
+      <fieldset :class="{ 'error': errorMessage }" class="form-group">
+        <legend :class="{ 'error': errorMessage }">Criar Ligação</legend>
+        <div class="form-row align-items-center">
+          <div class="col">
+            <label>
+              Solicitante:
+              <input v-model="formLigacao.solicitante" type="text" class="form-control" required />
+            </label>
+          </div>
+          <div class="col">
+            <label>
+              Solicitado:
+              <input v-model="formLigacao.solicitado" type="text" class="form-control" required />
+            </label>
+          </div>
+          <div class="col my-1">
+            <div class="custom-control custom-checkbox">
+              <input v-model="formLigacao.urgente" id="check" type="checkbox" class="custom-control-input" />
+              <label class="custom-control-label" for="check">
+                Urgente
+              </label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <ac-button @click.native.prevent="cancelar" type="secondary" :icon="getIcon">Cancelar</ac-button>
+          <button type="submit" class="btn btn-primary">{{ editando ? 'Salvar alterações' : 'Criar Ligação' }}</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -71,6 +85,10 @@ export default {
     },
     fechar() {
       this.$emit('fechar');
+    },
+    cancelar() {
+      this.formLigacao = { ...novaLigacao };
+      this.editando = false;
     },
   },
 };

@@ -7,6 +7,9 @@ import '@fortawesome/fontawesome-free/js/all.min';
 
 import App from './App.vue';
 import router from './router';
+import importComponent from './plugin/importComponent';
+
+Vue.use(importComponent);
 
 Vue.config.productionTip = false;
 global.axios = axios;
