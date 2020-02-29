@@ -38,3 +38,37 @@ functions:
       - http:
           path: hello-world
           method: get
+
+resources:
+  Resources:
+    tableLigacoes:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: Ligacoes
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+    seed:
+      domain:
+        sources:
+          - table: Ligacoes
+            sources: [./data/Ligacoes-inicial.json]
