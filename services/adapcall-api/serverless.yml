@@ -5,6 +5,8 @@ provider:
   runtime: nodejs12.x
   region: sa-east-1
   stage: dev
+  environment:
+    region: sa-east-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -32,11 +34,11 @@ package:
   - node_modules/aws-sdk/**
 
 functions:
-  hello:
-    handler: handler.hello
+  listLigacoes:
+    handler: src/v1/ligacoes/list.run
     events:
       - http:
-          path: hello-world
+          path: v1/ligacoes
           method: get
 
 resources:
