@@ -1,6 +1,7 @@
 const aws = require('aws-sdk');
+const uuid = require('uuid/v4');
 
-const TABLE_NAME = 'Ligacoes';
+const TABLE_NAME = 'Adapcall.Ligacoes';
 
 module.exports = class Dynamo {
   constructor() {
@@ -22,10 +23,12 @@ module.exports = class Dynamo {
         ExclusiveStartKey: LastEvaluatedKey,
       }).promise();
 
-      if (lastKey) return this.scan({
-        LastEvaluatedKey: lastKey,
-        _items: _items.concat(Items),
-      });
+      if (lastKey) {
+        return this.scan({
+          LastEvaluatedKey: lastKey,
+          _items: _items.concat(Items),
+        });
+      }
 
       return Items;
     } catch (err) {
@@ -56,15 +59,23 @@ module.exports = class Dynamo {
     }
   }
 
-  async put() {
-    try {
-      const { Items } = await this.db.put().promise();
+  /**
+   * @param {Ligacao} ligacao 
+   */
+  async put({ solicitante, solicitado, urgente }) {
+    const item = {
+      id: uuid(),
+      solicitante,
+      solicitado,
+      urgente: urgente || false,
+    };
 
-      return Items;
-    } catch (err) {
-      // TODO tratar erros
-      throw err;
-    }
+    await this.db.put({
+      TableName: TABLE_NAME,
+      Item: item,
+    }).promise();
+
+    return item;
   }
 
   async update() {

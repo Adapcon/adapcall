@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "install-all": "cd app && npm i && cd ../services/adapcall-api && npm i && npx sls dynamodb install",
+    "install-all": "npm i && cd app && npm i && cd ../services && npm i && cd ./adapcall-api && npm i && npx sls dynamodb install",
     "app": "cd app && npm run serve",
     "api": "cd services/adapcall-api && npx sls offline start",
     "all": "npm-run-all -l -p app api"

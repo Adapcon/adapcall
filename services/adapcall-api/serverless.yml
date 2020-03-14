@@ -5,28 +5,19 @@ provider:
   runtime: nodejs12.x
   region: sa-east-1
   stage: dev
+  memory: 128
   environment:
     region: sa-east-1
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource: 
+        Fn::Join:
+          - ""
+          - - "arn:aws:dynamodb:::"
+            - "Ref" : "Adapcall."
+            - "*"
 
 # you can add packaging information here
 package:
@@ -40,13 +31,19 @@ functions:
       - http:
           path: v1/ligacoes
           method: get
+  createLigacoes:
+    handler: src/v1/ligacoes/create.run
+    events:
+      - http:
+          path: v1/ligacoes
+          method: post
 
 resources:
   Resources:
     tableLigacoes:
       Type: 'AWS::DynamoDB::Table'
       Properties:
-        TableName: Ligacoes
+        TableName: Adapcall.Ligacoes
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -72,5 +69,5 @@ custom:
     seed:
       domain:
         sources:
-          - table: Ligacoes
+          - table: Adapcall.Ligacoes
             sources: [./data/Ligacoes-inicial.json]
